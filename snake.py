@@ -1,15 +1,21 @@
 """ Red Neuronal para aprender a jugar snake """
-import gym """ libreria de juego """
-import gym_snake""" libreria de snake """
+""" Librerias """
+import gym  
+import gym_snake 
 
-
-env = gym.make('snake-v0')  """ entorno """
-env.grid_size = [25,25] """ numero de seldas """
-env.n_foods = 2 """ numero de comidas """
-observation = env.reset()  """ poner todo a 0 """
+""" entorno """
+env = gym.make('snake-v0')  
+""" numero de seldas """
+env.grid_size = [25,25] 
+""" numero de seldas """
+env.n_foods = 2 
+""" poner todo a 0 """
+observation = env.reset()  
 
 
 while True:
+    """ acciones aleatrias """
     acccion = env.action_space.sample() 
-    env.step(acccion) """ acciones aleatrias """
-    env.render() """ pintar por pantalla """
+    env.step(acccion) 
+    """ pintar por pantalla """
+    env.render() 
