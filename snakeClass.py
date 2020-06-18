@@ -8,16 +8,16 @@ from DQN import DQNAgent
 from random import randint
 from keras.utils import to_categorical
 
-#################################
-#   Define parameters manually  #
-#################################
+
+#   parametros manualmente
+
 def define_parameters():
     params = dict()
-    params['epsilon_decay_linear'] = 1/75
+    params['epsilon_decay_linear'] = 1/80
     params['learning_rate'] = 0.0005
-    params['first_layer_size'] = 150   # neurons in the first layer
-    params['second_layer_size'] = 150   # neurons in the second layer
-    params['third_layer_size'] = 150    # neurons in the third layer
+    params['first_layer_size'] = 150   
+    params['second_layer_size'] = 150   
+    params['third_layer_size'] = 150    
     params['episodes'] = 150            
     params['memory_size'] = 2500
     params['batch_size'] = 500
@@ -103,7 +103,7 @@ class Player(object):
 
             update_screen()
         else:
-            pygame.time.wait(300)
+            pygame.time.wait(200)
 
 
 class Food(object):
@@ -142,11 +142,11 @@ def get_record(score, record):
 
 
 def display_ui(game, score, record):
-    myfont = pygame.font.SysFont('Segoe UI', 20)
-    myfont_bold = pygame.font.SysFont('Segoe UI', 20, True)
-    text_score = myfont.render('SCORE: ', True, (0, 0, 0))
+    myfont = pygame.font.SysFont(' UI', 20)
+    myfont_bold = pygame.font.SysFont(' UI', 20, True)
+    text_score = myfont.render('PUNTAJE: ', True, (0, 0, 0))
     text_score_number = myfont.render(str(score), True, (0, 0, 0))
-    text_highest = myfont.render('HIGHEST SCORE: ', True, (0, 0, 0))
+    text_highest = myfont.render('MEJOR PUNTAJE: ', True, (0, 0, 0))
     text_highest_number = myfont_bold.render(str(record), True, (0, 0, 0))
     game.gameDisplay.blit(text_score, (45, 440))
     game.gameDisplay.blit(text_score_number, (120, 440))
@@ -167,7 +167,7 @@ def update_screen():
 
 
 def initialize_game(player, game, food, agent, batch_size):
-    state_init1 = agent.get_state(game, player, food)  # [0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0]
+    state_init1 = agent.get_state(game, player, food)  
     action = [1, 0, 0]
     player.do_move(action, player.x, player.y, game, food, agent)
     state_init2 = agent.get_state(game, player, food)
@@ -189,7 +189,7 @@ def plot_seaborn(array_counter, array_score):
     plt.show()
 
 
-def run(display_option, speed, params):
+def run(display_option, velocidad, params):
     pygame.init()
     agent = DQNAgent(params)
     weights_filepath = params['weights_path']
@@ -206,12 +206,13 @@ def run(display_option, speed, params):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-        # Initialize classes
+            ##
+        
         game = Game(440, 440)
         player1 = game.player
         food1 = game.food
 
-        # Perform first move
+        # Realizar el primer movimiento
         initialize_game(player1, game, food1, agent, params['batch_size'])
         if display_option:
             display(player1, food1, game, record)
@@ -220,41 +221,41 @@ def run(display_option, speed, params):
             if not params['train']:
                 agent.epsilon = 0
             else:
-                # agent.epsilon is set to give randomness to actions
+                # agent.epsilon es configurado para dar aleatoriedad a las acciones
                 agent.epsilon = 1 - (counter_games * params['epsilon_decay_linear'])
 
-            # get old state
+            # estado antigui
             state_old = agent.get_state(game, player1, food1)
 
-            # perform random actions based on agent.epsilon, or choose the action
+            # realizar acciones aleatorias basadas en agent.epsilon, o elegir la acción
             if randint(0, 1) < agent.epsilon:
                 final_move = to_categorical(randint(0, 2), num_classes=3)
             else:
-                # predict action based on the old state
+                # predecir acciones basadas en el estado anterior
                 prediction = agent.model.predict(state_old.reshape((1, 11)))
                 final_move = to_categorical(np.argmax(prediction[0]), num_classes=3)
 
-            # perform new move and get new state
+            # realizar un nuevo movimiento y obtener un nuevo estado
             player1.do_move(final_move, player1.x, player1.y, game, food1, agent)
             state_new = agent.get_state(game, player1, food1)
 
-            # set reward for the new state
+            # establecer recompensa para el nuevo estado
             reward = agent.set_reward(player1, game.crash)
 
             if params['train']:
-                # train short memory base on the new action and state
+                # entrenar memoria corta basada en la nueva acción y estado
                 agent.train_short_memory(state_old, final_move, reward, state_new, game.crash)
-                # store the new data into a long term memory
+                # almacenar los nuevos datos en una memoria a largo plazo
                 agent.remember(state_old, final_move, reward, state_new, game.crash)
 
             record = get_record(game.score, record)
             if display_option:
                 display(player1, food1, game, record)
-                pygame.time.wait(speed)
+                pygame.time.wait(velocidad)
         if params['train']:
             agent.replay_new(agent.memory, params['batch_size'])
         counter_games += 1
-        print(f'Game {counter_games}      Score: {game.score}')
+        print(f'Juego # {counter_games}      Puntaje: {game.score}')
         score_plot.append(game.score)
         counter_plot.append(counter_games)
     if params['train']:
@@ -263,12 +264,11 @@ def run(display_option, speed, params):
 
 
 if __name__ == '__main__':
-    # Set options to activate or deactivate the game view, and its speed
+    # Establecer opciones para activar o desactivar la vista del juego y su velocidad.
     pygame.font.init()
     parser = argparse.ArgumentParser()
     params = define_parameters()
     parser.add_argument("--display", type=bool, default=True)
-    parser.add_argument("--speed", type=int, default=50)
+    parser.add_argument("--velocidad", type=int, default=20)
     args = parser.parse_args()
-    params['bayesian_optimization'] = False    # Use bayesOpt.py for Bayesian Optimization
-    run(args.display, args.speed, params)
+    run(args.display, args.velocidad, params)
