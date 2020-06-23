@@ -18,12 +18,10 @@ class DQNAgent(object):
         self.learning_rate = params['learning_rate']        
         self.epsilon = 1
         self.actual = []
-        self.first_layer = params['first_layer_size']
-        self.second_layer = params['second_layer_size']
-        self.third_layer = params['third_layer_size']
+        self.first_layer = params['capa1']
+        self.second_layer = params['capa2']
+        self.third_layer = params['capa3']
         self.memory = collections.deque(maxlen=params['memory_size'])
-        self.weights = params['weights_path']
-        self.load_weights = params['load_weights']
         self.model = self.network()
 
     def network(self):
@@ -35,8 +33,6 @@ class DQNAgent(object):
         opt = Adam(self.learning_rate)
         model.compile(loss='mse', optimizer=opt)
 
-        if self.load_weights:
-            model.load_weights(self.weights)
         return model
     
     def get_state(self, game, player, food):
